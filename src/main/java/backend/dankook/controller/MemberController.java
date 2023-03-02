@@ -1,8 +1,12 @@
 package backend.dankook.controller;
 
 import backend.dankook.dtos.MemberJoinDto;
+import backend.dankook.dtos.MemberLoginDto;
+import backend.dankook.dtos.TokenInfo;
 import backend.dankook.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +28,15 @@ public class MemberController {
                 memberJoinDto.getMemberType(),
                 memberJoinDto.getGender()
         );
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<TokenInfo> login(@RequestBody MemberLoginDto memberLoginDto){
+        TokenInfo tokenInfo = memberService.login(
+                memberLoginDto.getEmail(),
+                memberLoginDto.getPassword()
+        );
+        return new ResponseEntity<>(tokenInfo, HttpStatus.OK);
 
     }
 
