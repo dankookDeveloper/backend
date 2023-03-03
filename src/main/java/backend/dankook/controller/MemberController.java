@@ -40,4 +40,9 @@ public class MemberController {
 
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(){
+        return new ResponseEntity<>(memberService.logout(), HttpStatus.OK);
+    }
+
 }

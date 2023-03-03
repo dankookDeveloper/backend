@@ -1,11 +1,14 @@
 package backend.dankook.service;
 
 import backend.dankook.domain.Member;
+import backend.dankook.domain.RefreshToken;
 import backend.dankook.dtos.TokenInfo;
 import backend.dankook.enums.GenderEnum;
 import backend.dankook.enums.MemberTypeEnum;
 import backend.dankook.exception.DankookException;
 import backend.dankook.repository.MemberRepository;
+import backend.dankook.repository.RefreshTokenRepository;
+import backend.dankook.security.AuthenticationProvider;
 import backend.dankook.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -52,5 +56,17 @@ public class MemberService {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
         return jwtTokenProvider.generateToken(authentication);
+    }
+
+    public String logout() {
+        Member logoutMember = AuthenticationProvider.getCurrentMember();
+        String logoutEmail = logoutMember.getEmail();
+
+        RefreshToken logoutRefreshToken = refreshTokenRepository.findById(logoutEmail)
+                .orElseThrow(() -> new DankookException(HttpStatus.NOT_FOUND, "해당 회원의 refreshToken이 존재하지 않습니다."));
+
+        refreshTokenRepository.delete(logoutRefreshToken);
+
+        return "로그아웃 성공";
     }
 }
